@@ -63,6 +63,7 @@
                     <Button Grid.Column="2"
                             VerticalAlignment="Center"
                             Height="34"
+                            Margin="8,0,0,0"
                             Command="{Binding RefreshCommand}"
                             Content="{x:Static res:ViewerTextResources.Refresh}" />
 
@@ -81,6 +82,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -88,7 +90,35 @@
                     <TextBlock Text="{x:Static res:ViewerTextResources.Loading}" />
                 </Border>
 
-                <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,12">
+                <Border Grid.Row="1" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,12">
+                    <WrapPanel>
+                        <StackPanel Margin="0,0,14,0">
+                            <TextBlock Text="{x:Static res:ViewerTextResources.DeviceStatusFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                            <ComboBox Width="170"
+                                      ItemsSource="{Binding DeviceStatusFilters}"
+                                      SelectedItem="{Binding SelectedDeviceStatusFilter, Mode=TwoWay}"
+                                      DisplayMemberPath="Label" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,14,0">
+                            <TextBlock Text="{x:Static res:ViewerTextResources.AlertSeverityFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                            <ComboBox Width="170"
+                                      ItemsSource="{Binding AlertSeverityFilters}"
+                                      SelectedItem="{Binding SelectedAlertSeverityFilter, Mode=TwoWay}"
+                                      DisplayMemberPath="Label" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,14,0">
+                            <TextBlock Text="{x:Static res:ViewerTextResources.DeviceSortLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                            <ComboBox Width="210"
+                                      ItemsSource="{Binding DeviceSortOptions}"
+                                      SelectedItem="{Binding SelectedDeviceSortOption, Mode=TwoWay}"
+                                      DisplayMemberPath="Label" />
+                        </StackPanel>
+                    </WrapPanel>
+                </Border>
+
+                <UniformGrid Grid.Row="2" Columns="4" Margin="0,0,0,12">
                     <Border Style="{StaticResource PanelBorderStyle}">
                         <StackPanel>
                             <TextBlock Text="{x:Static res:ViewerTextResources.KpiActiveDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
@@ -115,7 +145,7 @@
                     </Border>
                 </UniformGrid>
 
-                <Grid Grid.Row="2">
+                <Grid Grid.Row="3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="2*" />
                         <ColumnDefinition Width="2*" />
@@ -176,7 +206,17 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AlertsHeader}" />
+
+                            <DockPanel Grid.Row="0" LastChildFill="False">
+                                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AlertsHeader}" />
+                                <Button DockPanel.Dock="Right"
+                                        Height="30"
+                                        Padding="12,4"
+                                        Margin="10,0,0,8"
+                                        Command="{Binding ClearAlertsCommand}"
+                                        Content="{x:Static res:ViewerTextResources.ClearAlerts}" />
+                            </DockPanel>
+
                             <DataGrid Grid.Row="1" Style="{StaticResource DataGridStyle}" ItemsSource="{Binding Alerts}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColMessage}" Binding="{Binding Message}" Width="2*" />

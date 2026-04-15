@@ -7,14 +7,19 @@ namespace OperationsMonitoringDashboard.Services;
 /// </summary>
 public class MockMonitoringDataService : IMonitoringDataService
 {
-    /// <inheritdoc />
-    public async Task<IReadOnlyList<DeviceModel>> GetDevicesAsync()
-    {
-        await Task.Delay(900);
+    private readonly object _syncRoot = new();
+    private readonly Random _random = new();
+    private readonly List<DeviceModel> _devices;
+    private readonly List<AlertModel> _alerts;
 
+    /// <summary>
+    /// Initializes mock data and internal state used for simulated real-time updates.
+    /// </summary>
+    public MockMonitoringDataService()
+    {
         DateTime now = DateTime.UtcNow;
 
-        return new List<DeviceModel>
+        _devices = new List<DeviceModel>
         {
             new() { Name = "Signal Node B7", Type = "Signal Node", Status = DeviceStatus.Online, LastUpdateTime = now.AddMinutes(-1), Region = "North Plant", Details = "Primary signal hub for northern process line.", ResponseTimeMs = 58 },
             new() { Name = "Pump Unit 4", Type = "Hydraulic Pump", Status = DeviceStatus.Warning, LastUpdateTime = now.AddMinutes(-4), Region = "West Annex", Details = "Pressure fluctuation detected in stage-2 intake.", ResponseTimeMs = 143 },
@@ -37,16 +42,8 @@ public class MockMonitoringDataService : IMonitoringDataService
             new() { Name = "Water Pump Z5", Type = "Pump", Status = DeviceStatus.Offline, LastUpdateTime = now.AddHours(-3).AddMinutes(-11), Region = "Water Treatment", Details = "Pump unreachable following breaker trip.", ResponseTimeMs = 0 },
             new() { Name = "Intake Gateway I6", Type = "Gateway", Status = DeviceStatus.Online, LastUpdateTime = now.AddMinutes(-1), Region = "North Plant", Details = "Intake gateway linked to all upstream nodes.", ResponseTimeMs = 55 }
         };
-    }
 
-    /// <inheritdoc />
-    public async Task<IReadOnlyList<AlertModel>> GetAlertsAsync()
-    {
-        await Task.Delay(700);
-
-        DateTime now = DateTime.UtcNow;
-
-        return new List<AlertModel>
+        _alerts = new List<AlertModel>
         {
             new() { Message = "Pressure variance above safe range", Severity = AlertSeverity.Critical, DeviceName = "Pump Unit 4", Timestamp = now.AddMinutes(-5) },
             new() { Message = "Device heartbeat missing", Severity = AlertSeverity.Critical, DeviceName = "Boiler Sensor H9", Timestamp = now.AddMinutes(-18) },
@@ -60,6 +57,184 @@ public class MockMonitoringDataService : IMonitoringDataService
             new() { Message = "Breaker trip detected", Severity = AlertSeverity.Critical, DeviceName = "Water Pump Z5", Timestamp = now.AddMinutes(-62) },
             new() { Message = "Signal jitter resolved", Severity = AlertSeverity.Info, DeviceName = "Signal Node B7", Timestamp = now.AddMinutes(-75) },
             new() { Message = "Gateway packet retries increasing", Severity = AlertSeverity.Warning, DeviceName = "Intake Gateway I6", Timestamp = now.AddMinutes(-14) }
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<DeviceModel>> GetDevicesAsync(DeviceQueryOptions options)
+    {
+        await Task.Delay(900);
+
+        lock (_syncRoot)
+        {
+            SimulateDeviceChanges();
+            return QueryDevices(options).ToList();
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<AlertModel>> GetAlertsAsync(AlertQueryOptions options)
+    {
+        await Task.Delay(700);
+
+        lock (_syncRoot)
+        {
+            SimulateAlertChanges();
+            return QueryAlerts(options).ToList();
+        }
+    }
+
+    /// <inheritdoc />
+    public Task ClearAlertsAsync()
+    {
+        lock (_syncRoot)
+        {
+            _alerts.Clear();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private IEnumerable<DeviceModel> QueryDevices(DeviceQueryOptions options)
+    {
+        IEnumerable<DeviceModel> devices = _devices.Select(CloneDevice);
+
+        if (!string.IsNullOrWhiteSpace(options.SearchText))
+        {
+            string searchText = options.SearchText.Trim();
+            devices = devices.Where(d =>
+                d.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                d.Type.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                d.Region.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (options.StatusFilter.HasValue)
+        {
+            devices = devices.Where(d => d.Status == options.StatusFilter.Value);
+        }
+
+        return options.SortBy switch
+        {
+            DeviceSortOption.Name => devices.OrderBy(d => d.Name),
+            DeviceSortOption.LastUpdate => devices.OrderByDescending(d => d.LastUpdateTime),
+            _ => devices.OrderByDescending(d => d.LastUpdateTime)
+        };
+    }
+
+    private IEnumerable<AlertModel> QueryAlerts(AlertQueryOptions options)
+    {
+        IEnumerable<AlertModel> alerts = _alerts.Select(CloneAlert);
+
+        if (options.SeverityFilter.HasValue)
+        {
+            alerts = alerts.Where(a => a.Severity == options.SeverityFilter.Value);
+        }
+
+        return alerts.OrderByDescending(a => a.Timestamp);
+    }
+
+    private void SimulateDeviceChanges()
+    {
+        DateTime now = DateTime.UtcNow;
+
+        foreach (var device in _devices)
+        {
+            if (_random.NextDouble() < 0.55)
+            {
+                device.LastUpdateTime = now.AddSeconds(-_random.Next(5, 150));
+            }
+
+            if (device.Status == DeviceStatus.Maintenance)
+            {
+                continue;
+            }
+
+            if (_random.NextDouble() < 0.2)
+            {
+                device.Status = _random.Next(0, 100) < 72 ? DeviceStatus.Online : DeviceStatus.Warning;
+            }
+
+            if (device.Status == DeviceStatus.Offline)
+            {
+                device.ResponseTimeMs = 0;
+                continue;
+            }
+
+            int jitter = _random.Next(-18, 20);
+            int baseline = Math.Max(device.ResponseTimeMs == 0 ? _random.Next(45, 95) : device.ResponseTimeMs, 35);
+            device.ResponseTimeMs = Math.Clamp(baseline + jitter, 30, 220);
+        }
+    }
+
+    private void SimulateAlertChanges()
+    {
+        if (_devices.Count == 0)
+        {
+            return;
+        }
+
+        DateTime now = DateTime.UtcNow;
+
+        if (_random.NextDouble() < 0.28)
+        {
+            DeviceModel sourceDevice = _devices[_random.Next(_devices.Count)];
+            AlertSeverity severity = GetSeverityForStatus(sourceDevice.Status);
+
+            _alerts.Add(new AlertModel
+            {
+                DeviceName = sourceDevice.Name,
+                Severity = severity,
+                Message = BuildSimulatedAlertMessage(sourceDevice, severity),
+                Timestamp = now
+            });
+        }
+
+        _alerts.RemoveAll(alert => alert.Timestamp < now.AddHours(-4));
+    }
+
+    private AlertSeverity GetSeverityForStatus(DeviceStatus status)
+    {
+        return status switch
+        {
+            DeviceStatus.Offline => AlertSeverity.Critical,
+            DeviceStatus.Warning => AlertSeverity.Warning,
+            DeviceStatus.Maintenance => AlertSeverity.Info,
+            _ => _random.NextDouble() < 0.2 ? AlertSeverity.Warning : AlertSeverity.Info
+        };
+    }
+
+    private static string BuildSimulatedAlertMessage(DeviceModel device, AlertSeverity severity)
+    {
+        return severity switch
+        {
+            AlertSeverity.Critical => $"Critical state detected for {device.Type}",
+            AlertSeverity.Warning => $"Performance warning raised on {device.Type}",
+            _ => $"Informational event reported by {device.Type}"
+        };
+    }
+
+    private static DeviceModel CloneDevice(DeviceModel device)
+    {
+        return new DeviceModel
+        {
+            Name = device.Name,
+            Type = device.Type,
+            Status = device.Status,
+            LastUpdateTime = device.LastUpdateTime,
+            Region = device.Region,
+            Details = device.Details,
+            ResponseTimeMs = device.ResponseTimeMs
+        };
+    }
+
+    private static AlertModel CloneAlert(AlertModel alert)
+    {
+        return new AlertModel
+        {
+            Message = alert.Message,
+            Severity = alert.Severity,
+            DeviceName = alert.DeviceName,
+            Timestamp = alert.Timestamp
         };
     }
 }
