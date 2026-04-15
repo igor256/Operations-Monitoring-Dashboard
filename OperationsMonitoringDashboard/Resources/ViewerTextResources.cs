@@ -12,10 +12,19 @@ public static class ViewerTextResources
     public const string NavLogs = "Logs";
     public const string NavSettings = "Settings";
 
-    public const string SearchPlaceholder = "Search devices, alerts, or logs";
+    public const string SearchPlaceholder = "Search devices by name, type, or region";
     public const string Refresh = "Refresh";
     public const string Loading = "Loading latest monitoring data...";
     public const string EnvironmentProd = "PROD";
+
+    public const string DeviceStatusFilterLabel = "Device Status";
+    public const string AlertSeverityFilterLabel = "Alert Severity";
+    public const string DeviceSortLabel = "Device Sort";
+    public const string AllStatuses = "All Statuses";
+    public const string AllSeverities = "All Severities";
+    public const string SortByName = "Name (A-Z)";
+    public const string SortByLastUpdate = "Last Update (Newest)";
+    public const string ClearAlerts = "Clear Alerts";
 
     public const string KpiActiveDevices = "Active Devices";
     public const string KpiOfflineDevices = "Offline Devices";
