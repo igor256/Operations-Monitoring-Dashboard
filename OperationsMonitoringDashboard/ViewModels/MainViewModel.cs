@@ -625,16 +625,57 @@ public class MainViewModel : ViewModelBase
 
     private static void SetBrushColor(string key, Color color)
     {
-        if (Application.Current.Resources[key] is SolidColorBrush brush)
+        var brush = ResolveThemeBrush(key);
+        if (brush == null)
         {
-            if (brush.IsFrozen)
-            {
-                Application.Current.Resources[key] = new SolidColorBrush(color);
-                return;
-            }
-
-            brush.Color = color;
+            return;
         }
+
+        brush.Color = color;
+    }
+
+    private static SolidColorBrush? ResolveThemeBrush(string key)
+    {
+        if (Application.Current == null)
+        {
+            return null;
+        }
+
+        if (TryGetMutableBrush(Application.Current.Resources, key, out var appLevelBrush))
+        {
+            return appLevelBrush;
+        }
+
+        foreach (var dictionary in Application.Current.Resources.MergedDictionaries.Reverse())
+        {
+            if (TryGetMutableBrush(dictionary, key, out var mergedBrush))
+            {
+                return mergedBrush;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool TryGetMutableBrush(ResourceDictionary dictionary, string key, out SolidColorBrush brush)
+    {
+        brush = null!;
+
+        if (!dictionary.Contains(key) || dictionary[key] is not SolidColorBrush existingBrush)
+        {
+            return false;
+        }
+
+        if (existingBrush.IsFrozen)
+        {
+            var mutableClone = existingBrush.CloneCurrentValue();
+            dictionary[key] = mutableClone;
+            brush = mutableClone;
+            return true;
+        }
+
+        brush = existingBrush;
+        return true;
     }
 
     private void AutoRefreshTimerOnTick(object? sender, EventArgs e)
