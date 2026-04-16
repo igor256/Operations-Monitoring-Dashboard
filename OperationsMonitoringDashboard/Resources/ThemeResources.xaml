@@ -134,4 +134,17 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="10,6"/>
     </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="#1A2433"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="10,6"/>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="Background" Value="#1A2433"/>
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
+    </Style>
 </ResourceDictionary>
