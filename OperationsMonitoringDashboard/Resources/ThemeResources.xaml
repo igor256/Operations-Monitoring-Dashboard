@@ -76,7 +76,6 @@
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
         <Setter Property="RowBackground" Value="#1A2230"/>
         <Setter Property="AlternatingRowBackground" Value="#1E2838"/>
-        <Setter Property="SelectionBrush" Value="#2A3E60"/>
         <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource BorderBrush}"/>
         <Setter Property="VerticalGridLinesBrush" Value="{StaticResource BorderBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}"/>
