@@ -579,8 +579,7 @@ public class MainViewModel : ViewModelBase
                 Color.FromRgb(0xCF, 0xDD, 0xF0),
                 Color.FromRgb(0xB9, 0xCF, 0xEA),
                 Color.FromRgb(0x4B, 0x77, 0xA7),
-                Color.FromRgb(0xD9, 0xE4, 0xF2),
-                Color.FromRgb(0x3E, 0x93, 0xD1)),
+                Color.FromRgb(0xD9, 0xE4, 0xF2)),
             _ => new ThemePalette(
                 Color.FromRgb(0x10, 0x14, 0x1B),
                 Color.FromRgb(0x17, 0x1C, 0x24),
@@ -628,6 +627,12 @@ public class MainViewModel : ViewModelBase
     {
         if (Application.Current.Resources[key] is SolidColorBrush brush)
         {
+            if (brush.IsFrozen)
+            {
+                Application.Current.Resources[key] = new SolidColorBrush(color);
+                return;
+            }
+
             brush.Color = color;
         }
     }
