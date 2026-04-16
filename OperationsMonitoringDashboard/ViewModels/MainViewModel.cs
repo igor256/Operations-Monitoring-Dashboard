@@ -59,18 +59,18 @@ public class MainViewModel : ViewModelBase
         DeviceStatusFilters = new ObservableCollection<SelectionOption<DeviceStatus?>>
         {
             new() { Label = ViewerTextResources.AllStatuses, Value = null },
-            new() { Label = DeviceStatus.Online.ToString(), Value = DeviceStatus.Online },
-            new() { Label = DeviceStatus.Warning.ToString(), Value = DeviceStatus.Warning },
-            new() { Label = DeviceStatus.Offline.ToString(), Value = DeviceStatus.Offline },
-            new() { Label = DeviceStatus.Maintenance.ToString(), Value = DeviceStatus.Maintenance }
+            new() { Label = ViewerTextResources.DeviceStatusOnline, Value = DeviceStatus.Online },
+            new() { Label = ViewerTextResources.DeviceStatusWarning, Value = DeviceStatus.Warning },
+            new() { Label = ViewerTextResources.DeviceStatusOffline, Value = DeviceStatus.Offline },
+            new() { Label = ViewerTextResources.DeviceStatusMaintenance, Value = DeviceStatus.Maintenance }
         };
 
         AlertSeverityFilters = new ObservableCollection<SelectionOption<AlertSeverity?>>
         {
             new() { Label = ViewerTextResources.AllSeverities, Value = null },
-            new() { Label = AlertSeverity.Info.ToString(), Value = AlertSeverity.Info },
-            new() { Label = AlertSeverity.Warning.ToString(), Value = AlertSeverity.Warning },
-            new() { Label = AlertSeverity.Critical.ToString(), Value = AlertSeverity.Critical }
+            new() { Label = ViewerTextResources.AlertSeverityInfo, Value = AlertSeverity.Info },
+            new() { Label = ViewerTextResources.AlertSeverityWarning, Value = AlertSeverity.Warning },
+            new() { Label = ViewerTextResources.AlertSeverityCritical, Value = AlertSeverity.Critical }
         };
 
         DeviceSortOptions = new ObservableCollection<SelectionOption<DeviceSortOption>>
@@ -81,9 +81,9 @@ public class MainViewModel : ViewModelBase
 
         EnvironmentOptions = new ObservableCollection<SelectionOption<DeploymentEnvironment>>
         {
-            new() { Label = "DEV", Value = DeploymentEnvironment.Dev },
-            new() { Label = "TEST", Value = DeploymentEnvironment.Test },
-            new() { Label = "PROD", Value = DeploymentEnvironment.Prod }
+            new() { Label = ViewerTextResources.EnvironmentDev, Value = DeploymentEnvironment.Dev },
+            new() { Label = ViewerTextResources.EnvironmentTest, Value = DeploymentEnvironment.Test },
+            new() { Label = ViewerTextResources.EnvironmentProd, Value = DeploymentEnvironment.Prod }
         };
 
         ThemeOptions = new ObservableCollection<SelectionOption<AppTheme>>
@@ -128,7 +128,7 @@ public class MainViewModel : ViewModelBase
     /// <summary>
     /// Gets the currently selected environment label.
     /// </summary>
-    public string EnvironmentLabel => SelectedEnvironmentOption?.Label ?? "PROD";
+    public string EnvironmentLabel => SelectedEnvironmentOption?.Label ?? ViewerTextResources.EnvironmentProd;
 
     /// <summary>
     /// Gets the navigation items shown in the left sidebar.
@@ -651,9 +651,14 @@ public class MainViewModel : ViewModelBase
             return false;
         }
 
-        // Always replace the brush instance to avoid mutating sealed/read-only shared brushes.
-        if (existingBrush.Color == color && !existingBrush.IsFrozen)
+        if (existingBrush.Color == color)
         {
+            return true;
+        }
+
+        if (!existingBrush.IsFrozen)
+        {
+            existingBrush.Color = color;
             return true;
         }
 

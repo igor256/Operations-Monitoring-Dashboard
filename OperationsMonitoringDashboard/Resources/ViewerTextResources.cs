@@ -21,6 +21,13 @@ public static class ViewerTextResources
     public const string DeviceSortLabel = "Device Sort";
     public const string AllStatuses = "All Statuses";
     public const string AllSeverities = "All Severities";
+    public const string DeviceStatusOnline = "Online";
+    public const string DeviceStatusWarning = "Warning";
+    public const string DeviceStatusOffline = "Offline";
+    public const string DeviceStatusMaintenance = "Maintenance";
+    public const string AlertSeverityInfo = "Info";
+    public const string AlertSeverityWarning = "Warning";
+    public const string AlertSeverityCritical = "Critical";
     public const string SortByName = "Name (A-Z)";
     public const string SortByLastUpdate = "Last Update (Newest)";
     public const string ClearAlerts = "Clear Alerts";
@@ -39,6 +46,9 @@ public static class ViewerTextResources
     public const string AlertsSectionHeader = "Alerts";
     public const string AppearanceSectionHeader = "Appearance";
     public const string EnvironmentSelectorLabel = "Environment";
+    public const string EnvironmentDev = "DEV";
+    public const string EnvironmentTest = "TEST";
+    public const string EnvironmentProd = "PROD";
     public const string AutoRefreshIntervalLabel = "Auto-refresh interval (seconds)";
     public const string AutoRefreshEnabledLabel = "Enable auto-refresh";
     public const string ShowCriticalOnlyLabel = "Show only critical alerts";
