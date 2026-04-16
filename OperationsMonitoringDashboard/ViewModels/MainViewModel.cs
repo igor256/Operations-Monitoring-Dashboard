@@ -591,6 +591,12 @@ public class MainViewModel : ViewModelBase
     {
         if (Application.Current.Resources[key] is SolidColorBrush brush)
         {
+            if (brush.IsFrozen)
+            {
+                Application.Current.Resources[key] = new SolidColorBrush(color);
+                return;
+            }
+
             brush.Color = color;
         }
     }
