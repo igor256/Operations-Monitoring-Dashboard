@@ -567,7 +567,20 @@ public class MainViewModel : ViewModelBase
                 Color.FromRgb(0xFF, 0xFF, 0xFF),
                 Color.FromRgb(0xD1, 0xDA, 0xE6),
                 Color.FromRgb(0x1A, 0x23, 0x33),
-                Color.FromRgb(0x4F, 0x5F, 0x78)),
+                Color.FromRgb(0x4F, 0x5F, 0x78),
+                Color.FromRgb(0xD9, 0xE4, 0xF5),
+                Color.FromRgb(0xE8, 0xEF, 0xF9),
+                Color.FromRgb(0xF6, 0xF9, 0xFE),
+                Color.FromRgb(0xEC, 0xF2, 0xFB),
+                Color.FromRgb(0xDB, 0xE7, 0xF7),
+                Color.FromRgb(0xDF, 0xEA, 0xFB),
+                Color.FromRgb(0xE9, 0xF0, 0xFC),
+                Color.FromRgb(0xD9, 0xE5, 0xF6),
+                Color.FromRgb(0xCF, 0xDD, 0xF0),
+                Color.FromRgb(0xB9, 0xCF, 0xEA),
+                Color.FromRgb(0x4B, 0x77, 0xA7),
+                Color.FromRgb(0xD9, 0xE4, 0xF2),
+                Color.FromRgb(0x3E, 0x93, 0xD1)),
             _ => new ThemePalette(
                 Color.FromRgb(0x10, 0x14, 0x1B),
                 Color.FromRgb(0x17, 0x1C, 0x24),
@@ -575,7 +588,19 @@ public class MainViewModel : ViewModelBase
                 Color.FromRgb(0x20, 0x27, 0x34),
                 Color.FromRgb(0x2A, 0x33, 0x44),
                 Color.FromRgb(0xF3, 0xF6, 0xFB),
-                Color.FromRgb(0xA6, 0xB1, 0xC2))
+                Color.FromRgb(0xA6, 0xB1, 0xC2),
+                Color.FromRgb(0x26, 0x34, 0x4C),
+                Color.FromRgb(0x22, 0x30, 0x48),
+                Color.FromRgb(0x1A, 0x22, 0x30),
+                Color.FromRgb(0x1E, 0x28, 0x38),
+                Color.FromRgb(0x24, 0x32, 0x47),
+                Color.FromRgb(0x2A, 0x3E, 0x60),
+                Color.FromRgb(0x24, 0x36, 0x51),
+                Color.FromRgb(0x1A, 0x24, 0x33),
+                Color.FromRgb(0x26, 0x3A, 0x58),
+                Color.FromRgb(0x2D, 0x5E, 0x8A),
+                Color.FromRgb(0x3A, 0x42, 0x52),
+                Color.FromRgb(0x66, 0xC0, 0xFF))
         };
 
         SetBrushColor("BackgroundBrush", palette.Background);
@@ -585,6 +610,18 @@ public class MainViewModel : ViewModelBase
         SetBrushColor("BorderBrush", palette.Border);
         SetBrushColor("TextPrimaryBrush", palette.TextPrimary);
         SetBrushColor("TextSecondaryBrush", palette.TextSecondary);
+        SetBrushColor("NavSelectedBrush", palette.NavSelected);
+        SetBrushColor("NavHoverBrush", palette.NavHover);
+        SetBrushColor("DataGridRowBrush", palette.DataGridRow);
+        SetBrushColor("DataGridAlternateRowBrush", palette.DataGridAlternateRow);
+        SetBrushColor("DataGridHeaderBrush", palette.DataGridHeader);
+        SetBrushColor("DataGridSelectionBrush", palette.DataGridSelection);
+        SetBrushColor("DataGridInactiveSelectionBrush", palette.DataGridInactiveSelection);
+        SetBrushColor("InputBackgroundBrush", palette.InputBackground);
+        SetBrushColor("ComboBoxHoverBrush", palette.ComboBoxHover);
+        SetBrushColor("InfoBadgeBrush", palette.InfoBadge);
+        SetBrushColor("EnvironmentBadgeBrush", palette.EnvironmentBadge);
+        SetBrushColor("MaintenanceBrush", palette.Maintenance);
     }
 
     private static void SetBrushColor(string key, Color color)
@@ -644,5 +681,17 @@ public class MainViewModel : ViewModelBase
         Color Card,
         Color Border,
         Color TextPrimary,
-        Color TextSecondary);
+        Color TextSecondary,
+        Color NavSelected,
+        Color NavHover,
+        Color DataGridRow,
+        Color DataGridAlternateRow,
+        Color DataGridHeader,
+        Color DataGridSelection,
+        Color DataGridInactiveSelection,
+        Color InputBackground,
+        Color ComboBoxHover,
+        Color InfoBadge,
+        Color EnvironmentBadge,
+        Color Maintenance);
 }

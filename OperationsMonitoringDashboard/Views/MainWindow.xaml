@@ -56,7 +56,7 @@
                         <Border Margin="0,4,0,0"
                                 Padding="8,2"
                                 CornerRadius="4"
-                                Background="#2D5E8A"
+                                Background="{StaticResource InfoBadgeBrush}"
                                 HorizontalAlignment="Left"
                                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{x:Static res:ViewerTextResources.Loading}"
@@ -84,7 +84,7 @@
                             Margin="10,0,0,0"
                             VerticalAlignment="Center"
                             CornerRadius="6"
-                            Background="#3A4252"
+                            Background="{StaticResource EnvironmentBadgeBrush}"
                             Padding="10,5">
                         <TextBlock Text="{Binding EnvironmentLabel}" FontWeight="SemiBold" />
                     </Border>
@@ -193,7 +193,7 @@
                                                                         <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Maintenance">
-                                                                        <Setter Property="Foreground" Value="#66C0FF" />
+                                                                        <Setter Property="Foreground" Value="{StaticResource MaintenanceBrush}" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -238,7 +238,7 @@
                                                                 <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Severity}" Value="Info">
-                                                                        <Setter Property="Foreground" Value="#66C0FF" />
+                                                                        <Setter Property="Foreground" Value="{StaticResource MaintenanceBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Severity}" Value="Warning">
                                                                         <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
