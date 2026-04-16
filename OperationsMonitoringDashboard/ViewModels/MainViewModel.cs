@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using OperationsMonitoringDashboard.Commands;
 using OperationsMonitoringDashboard.Models;
@@ -13,13 +15,14 @@ namespace OperationsMonitoringDashboard.ViewModels;
 /// </summary>
 public class MainViewModel : ViewModelBase
 {
-    private static readonly TimeSpan AutoRefreshInterval = TimeSpan.FromSeconds(8);
-
     private readonly IMonitoringDataService _monitoringDataService;
+    private readonly IAppSettingsService _settingsService;
     private readonly RelayCommand _refreshCommand;
     private readonly RelayCommand _clearAlertsCommand;
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
     private readonly DispatcherTimer _autoRefreshTimer;
+
+    private readonly List<AlertModel> _allAlerts = new();
 
     private DeviceModel? _selectedDevice;
     private bool _isLoading;
@@ -28,6 +31,13 @@ public class MainViewModel : ViewModelBase
     private SelectionOption<DeviceStatus?>? _selectedDeviceStatusFilter;
     private SelectionOption<AlertSeverity?>? _selectedAlertSeverityFilter;
     private SelectionOption<DeviceSortOption>? _selectedDeviceSortOption;
+    private SelectionOption<DeploymentEnvironment>? _selectedEnvironmentOption;
+    private int _autoRefreshIntervalSeconds;
+    private bool _isAutoRefreshEnabled;
+    private bool _showOnlyCriticalAlerts;
+    private bool _areAlertNotificationsEnabled;
+    private SelectionOption<AppTheme>? _selectedThemeOption;
+    private bool _areAnimationsEnabled;
 
     /// <summary>
     /// Initializes the dashboard view model and starts the first data load.
@@ -35,6 +45,7 @@ public class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         _monitoringDataService = new MockMonitoringDataService();
+        _settingsService = new InMemoryAppSettingsService();
 
         NavigationItems = new ObservableCollection<string>
         {
@@ -68,10 +79,31 @@ public class MainViewModel : ViewModelBase
             new() { Label = ViewerTextResources.SortByName, Value = DeviceSortOption.Name }
         };
 
+        EnvironmentOptions = new ObservableCollection<SelectionOption<DeploymentEnvironment>>
+        {
+            new() { Label = "DEV", Value = DeploymentEnvironment.Dev },
+            new() { Label = "TEST", Value = DeploymentEnvironment.Test },
+            new() { Label = "PROD", Value = DeploymentEnvironment.Prod }
+        };
+
+        ThemeOptions = new ObservableCollection<SelectionOption<AppTheme>>
+        {
+            new() { Label = ViewerTextResources.ThemeDark, Value = AppTheme.Dark },
+            new() { Label = ViewerTextResources.ThemeLight, Value = AppTheme.Light }
+        };
+
         _selectedNavigationItem = ViewerTextResources.NavOverview;
         _selectedDeviceStatusFilter = DeviceStatusFilters.First();
         _selectedAlertSeverityFilter = AlertSeverityFilters.First();
         _selectedDeviceSortOption = DeviceSortOptions.First();
+
+        SelectedEnvironmentOption = EnvironmentOptions.First(o => o.Value == _settingsService.Environment);
+        _autoRefreshIntervalSeconds = _settingsService.AutoRefreshIntervalSeconds;
+        _isAutoRefreshEnabled = _settingsService.IsAutoRefreshEnabled;
+        _showOnlyCriticalAlerts = _settingsService.ShowOnlyCriticalAlerts;
+        _areAlertNotificationsEnabled = _settingsService.AreAlertNotificationsEnabled;
+        SelectedThemeOption = ThemeOptions.First(o => o.Value == _settingsService.Theme);
+        _areAnimationsEnabled = _settingsService.AreAnimationsEnabled;
 
         Devices = new ObservableCollection<DeviceModel>();
         Alerts = new ObservableCollection<AlertModel>();
@@ -79,26 +111,24 @@ public class MainViewModel : ViewModelBase
         _refreshCommand = new RelayCommand(async _ => await RefreshAsync(), _ => !IsLoading);
         _clearAlertsCommand = new RelayCommand(async _ => await ClearAlertsAsync(), _ => !IsLoading && Alerts.Count > 0);
 
-        _autoRefreshTimer = new DispatcherTimer
-        {
-            Interval = AutoRefreshInterval
-        };
-
+        _autoRefreshTimer = new DispatcherTimer();
         _autoRefreshTimer.Tick += AutoRefreshTimerOnTick;
-        _autoRefreshTimer.Start();
+
+        ApplyTheme();
+        ApplyAutoRefreshConfiguration();
 
         _ = RefreshAsync();
     }
 
     /// <summary>
-    /// Gets the application title text.
+    /// Gets the current page title shown in the top bar.
     /// </summary>
-    public string Title => ViewerTextResources.AppTitle;
+    public string Title => IsSettingsViewActive ? ViewerTextResources.SettingsHeader : ViewerTextResources.AppTitle;
 
     /// <summary>
-    /// Gets the current deployment environment label.
+    /// Gets the currently selected environment label.
     /// </summary>
-    public string EnvironmentLabel => ViewerTextResources.EnvironmentProd;
+    public string EnvironmentLabel => SelectedEnvironmentOption?.Label ?? "PROD";
 
     /// <summary>
     /// Gets the navigation items shown in the left sidebar.
@@ -119,6 +149,16 @@ public class MainViewModel : ViewModelBase
     /// Gets the available device sort options.
     /// </summary>
     public ObservableCollection<SelectionOption<DeviceSortOption>> DeviceSortOptions { get; }
+
+    /// <summary>
+    /// Gets the available environment settings options.
+    /// </summary>
+    public ObservableCollection<SelectionOption<DeploymentEnvironment>> EnvironmentOptions { get; }
+
+    /// <summary>
+    /// Gets the available theme settings options.
+    /// </summary>
+    public ObservableCollection<SelectionOption<AppTheme>> ThemeOptions { get; }
 
     /// <summary>
     /// Gets the collection of devices shown on the dashboard.
@@ -146,8 +186,26 @@ public class MainViewModel : ViewModelBase
     public string SelectedNavigationItem
     {
         get => _selectedNavigationItem;
-        set => SetProperty(ref _selectedNavigationItem, value);
+        set
+        {
+            if (SetProperty(ref _selectedNavigationItem, value))
+            {
+                OnPropertyChanged(nameof(IsSettingsViewActive));
+                OnPropertyChanged(nameof(IsDashboardViewActive));
+                OnPropertyChanged(nameof(Title));
+            }
+        }
     }
+
+    /// <summary>
+    /// Gets whether the settings view is active.
+    /// </summary>
+    public bool IsSettingsViewActive => SelectedNavigationItem == ViewerTextResources.NavSettings;
+
+    /// <summary>
+    /// Gets whether the dashboard view is active.
+    /// </summary>
+    public bool IsDashboardViewActive => !IsSettingsViewActive;
 
     /// <summary>
     /// Gets or sets search text entered by the user.
@@ -205,6 +263,118 @@ public class MainViewModel : ViewModelBase
             if (SetProperty(ref _selectedDeviceSortOption, value))
             {
                 _ = RefreshAsync();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets selected deployment environment option.
+    /// </summary>
+    public SelectionOption<DeploymentEnvironment>? SelectedEnvironmentOption
+    {
+        get => _selectedEnvironmentOption;
+        set
+        {
+            if (SetProperty(ref _selectedEnvironmentOption, value) && value != null)
+            {
+                _settingsService.Environment = value.Value;
+                OnPropertyChanged(nameof(EnvironmentLabel));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the auto refresh interval in seconds.
+    /// </summary>
+    public int AutoRefreshIntervalSeconds
+    {
+        get => _autoRefreshIntervalSeconds;
+        set
+        {
+            int safeValue = Math.Clamp(value, 1, 300);
+
+            if (SetProperty(ref _autoRefreshIntervalSeconds, safeValue))
+            {
+                _settingsService.AutoRefreshIntervalSeconds = safeValue;
+                ApplyAutoRefreshConfiguration();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether automatic refreshing is enabled.
+    /// </summary>
+    public bool IsAutoRefreshEnabled
+    {
+        get => _isAutoRefreshEnabled;
+        set
+        {
+            if (SetProperty(ref _isAutoRefreshEnabled, value))
+            {
+                _settingsService.IsAutoRefreshEnabled = value;
+                ApplyAutoRefreshConfiguration();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether only critical alerts should be shown.
+    /// </summary>
+    public bool ShowOnlyCriticalAlerts
+    {
+        get => _showOnlyCriticalAlerts;
+        set
+        {
+            if (SetProperty(ref _showOnlyCriticalAlerts, value))
+            {
+                _settingsService.ShowOnlyCriticalAlerts = value;
+                ApplyAlertProjection();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether alert notifications are enabled.
+    /// </summary>
+    public bool AreAlertNotificationsEnabled
+    {
+        get => _areAlertNotificationsEnabled;
+        set
+        {
+            if (SetProperty(ref _areAlertNotificationsEnabled, value))
+            {
+                _settingsService.AreAlertNotificationsEnabled = value;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets selected theme option.
+    /// </summary>
+    public SelectionOption<AppTheme>? SelectedThemeOption
+    {
+        get => _selectedThemeOption;
+        set
+        {
+            if (SetProperty(ref _selectedThemeOption, value) && value != null)
+            {
+                _settingsService.Theme = value.Value;
+                ApplyTheme();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets whether animations are enabled.
+    /// </summary>
+    public bool AreAnimationsEnabled
+    {
+        get => _areAnimationsEnabled;
+        set
+        {
+            if (SetProperty(ref _areAnimationsEnabled, value))
+            {
+                _settingsService.AreAnimationsEnabled = value;
             }
         }
     }
@@ -367,6 +537,64 @@ public class MainViewModel : ViewModelBase
         }
     }
 
+    private void ApplyAutoRefreshConfiguration()
+    {
+        _autoRefreshTimer.Interval = TimeSpan.FromSeconds(AutoRefreshIntervalSeconds);
+
+        if (IsAutoRefreshEnabled)
+        {
+            _autoRefreshTimer.Start();
+        }
+        else
+        {
+            _autoRefreshTimer.Stop();
+        }
+    }
+
+    private void ApplyTheme()
+    {
+        if (SelectedThemeOption == null)
+        {
+            return;
+        }
+
+        var palette = SelectedThemeOption.Value switch
+        {
+            AppTheme.Light => new ThemePalette(
+                Color.FromRgb(0xEF, 0xF3, 0xF9),
+                Color.FromRgb(0xE2, 0xE8, 0xF0),
+                Color.FromRgb(0xF8, 0xFA, 0xFD),
+                Color.FromRgb(0xFF, 0xFF, 0xFF),
+                Color.FromRgb(0xD1, 0xDA, 0xE6),
+                Color.FromRgb(0x1A, 0x23, 0x33),
+                Color.FromRgb(0x4F, 0x5F, 0x78)),
+            _ => new ThemePalette(
+                Color.FromRgb(0x10, 0x14, 0x1B),
+                Color.FromRgb(0x17, 0x1C, 0x24),
+                Color.FromRgb(0x1A, 0x20, 0x2A),
+                Color.FromRgb(0x20, 0x27, 0x34),
+                Color.FromRgb(0x2A, 0x33, 0x44),
+                Color.FromRgb(0xF3, 0xF6, 0xFB),
+                Color.FromRgb(0xA6, 0xB1, 0xC2))
+        };
+
+        SetBrushColor("BackgroundBrush", palette.Background);
+        SetBrushColor("SidebarBrush", palette.Sidebar);
+        SetBrushColor("TopBarBrush", palette.TopBar);
+        SetBrushColor("CardBrush", palette.Card);
+        SetBrushColor("BorderBrush", palette.Border);
+        SetBrushColor("TextPrimaryBrush", palette.TextPrimary);
+        SetBrushColor("TextSecondaryBrush", palette.TextSecondary);
+    }
+
+    private static void SetBrushColor(string key, Color color)
+    {
+        if (Application.Current.Resources[key] is SolidColorBrush brush)
+        {
+            brush.Color = color;
+        }
+    }
+
     private void AutoRefreshTimerOnTick(object? sender, EventArgs e)
     {
         _ = RefreshAsync();
@@ -384,13 +612,37 @@ public class MainViewModel : ViewModelBase
 
     private void UpdateAlerts(IEnumerable<AlertModel> updatedAlerts)
     {
+        _allAlerts.Clear();
+        _allAlerts.AddRange(updatedAlerts);
+        ApplyAlertProjection();
+    }
+
+    private void ApplyAlertProjection()
+    {
+        IEnumerable<AlertModel> projectedAlerts = _allAlerts;
+
+        if (ShowOnlyCriticalAlerts)
+        {
+            projectedAlerts = projectedAlerts.Where(a => a.Severity == AlertSeverity.Critical);
+        }
+
         Alerts.Clear();
 
-        foreach (var alert in updatedAlerts)
+        foreach (var alert in projectedAlerts)
         {
             Alerts.Add(alert);
         }
 
         _clearAlertsCommand.RaiseCanExecuteChanged();
+        OnPropertyChanged(nameof(CriticalAlertsCount));
     }
+
+    private sealed record ThemePalette(
+        Color Background,
+        Color Sidebar,
+        Color TopBar,
+        Color Card,
+        Color Border,
+        Color TextPrimary,
+        Color TextSecondary);
 }

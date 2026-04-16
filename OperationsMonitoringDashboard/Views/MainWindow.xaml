@@ -12,6 +12,7 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </Window.Resources>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="220" />
@@ -68,14 +69,16 @@
                              VerticalAlignment="Center"
                              Height="34"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="{x:Static res:ViewerTextResources.SearchPlaceholder}" />
+                             ToolTip="{x:Static res:ViewerTextResources.SearchPlaceholder}"
+                             Visibility="{Binding IsDashboardViewActive, Converter={StaticResource BoolToVisibility}}" />
 
                     <Button Grid.Column="2"
                             VerticalAlignment="Center"
                             Height="34"
                             Margin="8,0,0,0"
                             Command="{Binding RefreshCommand}"
-                            Content="{x:Static res:ViewerTextResources.Refresh}" />
+                            Content="{x:Static res:ViewerTextResources.Refresh}"
+                            Visibility="{Binding IsDashboardViewActive, Converter={StaticResource BoolToVisibility}}" />
 
                     <Border Grid.Column="3"
                             Margin="10,0,0,0"
@@ -89,204 +92,266 @@
             </Border>
 
             <Grid Grid.Row="1" Margin="18">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                <Grid Visibility="{Binding IsDashboardViewActive, Converter={StaticResource BoolToVisibility}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <Border Grid.Row="0" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,12">
-                    <WrapPanel>
-                        <StackPanel Margin="0,0,14,0">
-                            <TextBlock Text="{x:Static res:ViewerTextResources.DeviceStatusFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <ComboBox Width="170"
-                                      ItemsSource="{Binding DeviceStatusFilters}"
-                                      SelectedItem="{Binding SelectedDeviceStatusFilter, Mode=TwoWay}"
-                                      DisplayMemberPath="Label" />
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,14,0">
-                            <TextBlock Text="{x:Static res:ViewerTextResources.AlertSeverityFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <ComboBox Width="170"
-                                      ItemsSource="{Binding AlertSeverityFilters}"
-                                      SelectedItem="{Binding SelectedAlertSeverityFilter, Mode=TwoWay}"
-                                      DisplayMemberPath="Label" />
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,14,0">
-                            <TextBlock Text="{x:Static res:ViewerTextResources.DeviceSortLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <ComboBox Width="210"
-                                      ItemsSource="{Binding DeviceSortOptions}"
-                                      SelectedItem="{Binding SelectedDeviceSortOption, Mode=TwoWay}"
-                                      DisplayMemberPath="Label" />
-                        </StackPanel>
-                    </WrapPanel>
-                </Border>
-
-                <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,12">
-                    <Border Style="{StaticResource PanelBorderStyle}">
-                        <StackPanel>
-                            <TextBlock Text="{x:Static res:ViewerTextResources.KpiActiveDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <TextBlock Text="{Binding ActiveDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OnlineBrush}" />
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource PanelBorderStyle}">
-                        <StackPanel>
-                            <TextBlock Text="{x:Static res:ViewerTextResources.KpiOfflineDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <TextBlock Text="{Binding OfflineDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OfflineBrush}" />
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource PanelBorderStyle}">
-                        <StackPanel>
-                            <TextBlock Text="{x:Static res:ViewerTextResources.KpiCriticalAlerts}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <TextBlock Text="{Binding CriticalAlertsCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OfflineBrush}" />
-                        </StackPanel>
-                    </Border>
-                    <Border Style="{StaticResource PanelBorderStyle}">
-                        <StackPanel>
-                            <TextBlock Text="{x:Static res:ViewerTextResources.KpiAverageResponse}" Foreground="{StaticResource TextSecondaryBrush}" />
-                            <TextBlock Text="{Binding AverageResponseTimeMs, StringFormat={}{0} ms}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" />
-                        </StackPanel>
-                    </Border>
-                </UniformGrid>
-
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="1.4*" />
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource PanelBorderStyle}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.DevicesHeader}" />
-                            <DataGrid Grid.Row="1"
-                                      Style="{StaticResource DataGridStyle}"
-                                      ItemsSource="{Binding Devices}"
-                                      SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColName}" Binding="{Binding Name}" Width="*" />
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColType}" Binding="{Binding Type}" Width="*" />
-                                    <DataGridTemplateColumn Header="{x:Static res:ViewerTextResources.ColStatus}" Width="*">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Status}" FontWeight="SemiBold">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Status}" Value="Online">
-                                                                    <Setter Property="Foreground" Value="{StaticResource OnlineBrush}" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Status}" Value="Warning">
-                                                                    <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Status}" Value="Offline">
-                                                                    <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Status}" Value="Maintenance">
-                                                                    <Setter Property="Foreground" Value="#66C0FF" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColLastUpdate}" Binding="{Binding LastUpdateTime, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" Width="*" />
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColRegion}" Binding="{Binding Region}" Width="*" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Grid>
-                    </Border>
-
-                    <Border Grid.Column="1" Style="{StaticResource PanelBorderStyle}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-
-                            <DockPanel Grid.Row="0" LastChildFill="False">
-                                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AlertsHeader}" />
-                                <Button DockPanel.Dock="Right"
-                                        Height="30"
-                                        Padding="12,4"
-                                        Margin="10,0,0,8"
-                                        Command="{Binding ClearAlertsCommand}"
-                                        Content="{x:Static res:ViewerTextResources.ClearAlerts}" />
-                            </DockPanel>
-
-                            <DataGrid Grid.Row="1" Style="{StaticResource DataGridStyle}" ItemsSource="{Binding Alerts}">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColMessage}" Binding="{Binding Message}" Width="2*" />
-                                    <DataGridTemplateColumn Header="{x:Static res:ViewerTextResources.ColSeverity}" Width="*">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Severity}" FontWeight="SemiBold">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Severity}" Value="Info">
-                                                                    <Setter Property="Foreground" Value="#66C0FF" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Severity}" Value="Warning">
-                                                                    <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding Severity}" Value="Critical">
-                                                                    <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColDeviceName}" Binding="{Binding DeviceName}" Width="*" />
-                                    <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColTimestamp}" Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" Width="*" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </Grid>
-                    </Border>
-
-                    <Border Grid.Column="2" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,10">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.DeviceDetailsHeader}" />
-
-                            <StackPanel Grid.Row="1">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelName}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDevice.Name, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelType}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDevice.Type, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelRegion}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDevice.Region, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelStatus}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDeviceStatusText}" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelLastUpdate}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDeviceLastUpdateText}" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelResponseTime}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDeviceResponseTimeText}" Margin="0,0,0,8"/>
-
-                                <TextBlock Text="{x:Static res:ViewerTextResources.LabelDetails}" Foreground="{StaticResource TextSecondaryBrush}"/>
-                                <TextBlock Text="{Binding SelectedDevice.Details, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" TextWrapping="Wrap" />
+                    <Border Grid.Row="0" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,12">
+                        <WrapPanel>
+                            <StackPanel Margin="0,0,14,0">
+                                <TextBlock Text="{x:Static res:ViewerTextResources.DeviceStatusFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <ComboBox Width="170"
+                                          ItemsSource="{Binding DeviceStatusFilters}"
+                                          SelectedItem="{Binding SelectedDeviceStatusFilter, Mode=TwoWay}"
+                                          DisplayMemberPath="Label" />
                             </StackPanel>
-                        </Grid>
+
+                            <StackPanel Margin="0,0,14,0">
+                                <TextBlock Text="{x:Static res:ViewerTextResources.AlertSeverityFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <ComboBox Width="170"
+                                          ItemsSource="{Binding AlertSeverityFilters}"
+                                          SelectedItem="{Binding SelectedAlertSeverityFilter, Mode=TwoWay}"
+                                          DisplayMemberPath="Label" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,14,0">
+                                <TextBlock Text="{x:Static res:ViewerTextResources.DeviceSortLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <ComboBox Width="210"
+                                          ItemsSource="{Binding DeviceSortOptions}"
+                                          SelectedItem="{Binding SelectedDeviceSortOption, Mode=TwoWay}"
+                                          DisplayMemberPath="Label" />
+                            </StackPanel>
+                        </WrapPanel>
+                    </Border>
+
+                    <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,12">
+                        <Border Style="{StaticResource PanelBorderStyle}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiActiveDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding ActiveDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OnlineBrush}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelBorderStyle}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiOfflineDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding OfflineDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OfflineBrush}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelBorderStyle}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiCriticalAlerts}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding CriticalAlertsCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OfflineBrush}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource PanelBorderStyle}">
+                            <StackPanel>
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiAverageResponse}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding AverageResponseTimeMs, StringFormat={}{0} ms}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1.4*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Style="{StaticResource PanelBorderStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.DevicesHeader}" />
+                                <DataGrid Grid.Row="1"
+                                          Style="{StaticResource DataGridStyle}"
+                                          ItemsSource="{Binding Devices}"
+                                          SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColName}" Binding="{Binding Name}" Width="*" />
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColType}" Binding="{Binding Type}" Width="*" />
+                                        <DataGridTemplateColumn Header="{x:Static res:ViewerTextResources.ColStatus}" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Status}" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Online">
+                                                                        <Setter Property="Foreground" Value="{StaticResource OnlineBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Warning">
+                                                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Offline">
+                                                                        <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="Maintenance">
+                                                                        <Setter Property="Foreground" Value="#66C0FF" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColLastUpdate}" Binding="{Binding LastUpdateTime, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" Width="*" />
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColRegion}" Binding="{Binding Region}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="1" Style="{StaticResource PanelBorderStyle}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <DockPanel Grid.Row="0" LastChildFill="False">
+                                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AlertsHeader}" />
+                                    <Button DockPanel.Dock="Right"
+                                            Height="30"
+                                            Padding="12,4"
+                                            Margin="10,0,0,8"
+                                            Command="{Binding ClearAlertsCommand}"
+                                            Content="{x:Static res:ViewerTextResources.ClearAlerts}" />
+                                </DockPanel>
+
+                                <DataGrid Grid.Row="1" Style="{StaticResource DataGridStyle}" ItemsSource="{Binding Alerts}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColMessage}" Binding="{Binding Message}" Width="2*" />
+                                        <DataGridTemplateColumn Header="{x:Static res:ViewerTextResources.ColSeverity}" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Severity}" FontWeight="SemiBold">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="Info">
+                                                                        <Setter Property="Foreground" Value="#66C0FF" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="Warning">
+                                                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Severity}" Value="Critical">
+                                                                        <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColDeviceName}" Binding="{Binding DeviceName}" Width="*" />
+                                        <DataGridTextColumn Header="{x:Static res:ViewerTextResources.ColTimestamp}" Binding="{Binding Timestamp, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.DeviceDetailsHeader}" />
+
+                                <StackPanel Grid.Row="1">
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelName}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDevice.Name, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelType}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDevice.Type, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelRegion}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDevice.Region, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelStatus}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDeviceStatusText}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelLastUpdate}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDeviceLastUpdateText}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelResponseTime}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDeviceResponseTimeText}" Margin="0,0,0,8"/>
+
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelDetails}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding SelectedDevice.Details, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <Grid Visibility="{Binding IsSettingsViewActive, Converter={StaticResource BoolToVisibility}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.GeneralSectionHeader}" />
+
+                            <StackPanel Margin="0,0,0,10">
+                                <TextBlock Text="{x:Static res:ViewerTextResources.EnvironmentSelectorLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <ComboBox Width="180"
+                                          ItemsSource="{Binding EnvironmentOptions}"
+                                          SelectedItem="{Binding SelectedEnvironmentOption, Mode=TwoWay}"
+                                          DisplayMemberPath="Label" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,10">
+                                <TextBlock Text="{x:Static res:ViewerTextResources.AutoRefreshIntervalLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBox Width="180"
+                                         Text="{Binding AutoRefreshIntervalSeconds, UpdateSourceTrigger=LostFocus}" />
+                            </StackPanel>
+
+                            <CheckBox Content="{x:Static res:ViewerTextResources.AutoRefreshEnabledLabel}"
+                                      IsChecked="{Binding IsAutoRefreshEnabled, Mode=TwoWay}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="1" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AlertsSectionHeader}" />
+                            <CheckBox Margin="0,0,0,8"
+                                      Content="{x:Static res:ViewerTextResources.ShowCriticalOnlyLabel}"
+                                      IsChecked="{Binding ShowOnlyCriticalAlerts, Mode=TwoWay}" />
+                            <CheckBox Content="{x:Static res:ViewerTextResources.AlertNotificationsLabel}"
+                                      IsChecked="{Binding AreAlertNotificationsEnabled, Mode=TwoWay}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2" Style="{StaticResource PanelBorderStyle}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AppearanceSectionHeader}" />
+
+                            <StackPanel Margin="0,0,0,10">
+                                <TextBlock Text="{x:Static res:ViewerTextResources.ThemeLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <ComboBox Width="180"
+                                          ItemsSource="{Binding ThemeOptions}"
+                                          SelectedItem="{Binding SelectedThemeOption, Mode=TwoWay}"
+                                          DisplayMemberPath="Label" />
+                            </StackPanel>
+
+                            <CheckBox Content="{x:Static res:ViewerTextResources.AnimationsEnabledLabel}"
+                                      IsChecked="{Binding AreAnimationsEnabled, Mode=TwoWay}" />
+                        </StackPanel>
                     </Border>
                 </Grid>
             </Grid>
