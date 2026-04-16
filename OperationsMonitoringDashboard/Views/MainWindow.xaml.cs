@@ -13,7 +13,7 @@ public partial class MainWindow : Window
     /// </summary>
     public MainWindow()
     {
-        InitializeComponent();
         DataContext = new MainViewModel();
+        InitializeComponent();
     }
 }
