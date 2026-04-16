@@ -15,7 +15,6 @@ public static class ViewerTextResources
     public const string SearchPlaceholder = "Search devices by name, type, or region";
     public const string Refresh = "Refresh";
     public const string Loading = "Loading latest monitoring data...";
-    public const string EnvironmentProd = "PROD";
 
     public const string DeviceStatusFilterLabel = "Device Status";
     public const string AlertSeverityFilterLabel = "Alert Severity";
@@ -34,6 +33,20 @@ public static class ViewerTextResources
     public const string DevicesHeader = "Devices";
     public const string AlertsHeader = "Alerts";
     public const string DeviceDetailsHeader = "Device Details";
+
+    public const string SettingsHeader = "Settings";
+    public const string GeneralSectionHeader = "General";
+    public const string AlertsSectionHeader = "Alerts";
+    public const string AppearanceSectionHeader = "Appearance";
+    public const string EnvironmentSelectorLabel = "Environment";
+    public const string AutoRefreshIntervalLabel = "Auto-refresh interval (seconds)";
+    public const string AutoRefreshEnabledLabel = "Enable auto-refresh";
+    public const string ShowCriticalOnlyLabel = "Show only critical alerts";
+    public const string AlertNotificationsLabel = "Enable alert notifications";
+    public const string ThemeLabel = "Theme";
+    public const string ThemeDark = "Dark";
+    public const string ThemeLight = "Light";
+    public const string AnimationsEnabledLabel = "Enable animations";
 
     public const string ColName = "Name";
     public const string ColType = "Type";
