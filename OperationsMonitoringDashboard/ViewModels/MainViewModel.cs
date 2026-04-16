@@ -625,56 +625,39 @@ public class MainViewModel : ViewModelBase
 
     private static void SetBrushColor(string key, Color color)
     {
-        var brush = ResolveThemeBrush(key);
-        if (brush == null)
+        if (Application.Current == null)
         {
             return;
         }
 
-        brush.Color = color;
-    }
-
-    private static SolidColorBrush? ResolveThemeBrush(string key)
-    {
-        if (Application.Current == null)
+        if (TrySetBrushColor(Application.Current.Resources, key, color))
         {
-            return null;
-        }
-
-        if (TryGetMutableBrush(Application.Current.Resources, key, out var appLevelBrush))
-        {
-            return appLevelBrush;
+            return;
         }
 
         foreach (var dictionary in Application.Current.Resources.MergedDictionaries.Reverse())
         {
-            if (TryGetMutableBrush(dictionary, key, out var mergedBrush))
+            if (TrySetBrushColor(dictionary, key, color))
             {
-                return mergedBrush;
+                return;
             }
         }
-
-        return null;
     }
 
-    private static bool TryGetMutableBrush(ResourceDictionary dictionary, string key, out SolidColorBrush brush)
+    private static bool TrySetBrushColor(ResourceDictionary dictionary, string key, Color color)
     {
-        brush = null!;
-
         if (!dictionary.Contains(key) || dictionary[key] is not SolidColorBrush existingBrush)
         {
             return false;
         }
 
-        if (existingBrush.IsFrozen)
+        // Always replace the brush instance to avoid mutating sealed/read-only shared brushes.
+        if (existingBrush.Color == color && !existingBrush.IsFrozen)
         {
-            var mutableClone = existingBrush.CloneCurrentValue();
-            dictionary[key] = mutableClone;
-            brush = mutableClone;
             return true;
         }
 
-        brush = existingBrush;
+        dictionary[key] = new SolidColorBrush(color);
         return true;
     }
 
