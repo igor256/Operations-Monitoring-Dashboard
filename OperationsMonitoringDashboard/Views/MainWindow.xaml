@@ -8,7 +8,7 @@
         Title="{x:Static res:ViewerTextResources.AppTitle}"
         Width="1450"
         Height="860"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{DynamicResource BackgroundBrush}">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </Window.Resources>
@@ -19,7 +19,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}">
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}">
             <StackPanel Margin="12,16">
                 <TextBlock Text="{x:Static res:ViewerTextResources.AppTitle}"
                            FontSize="17"
@@ -40,7 +40,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="{StaticResource TopBarBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" Background="{DynamicResource TopBarBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
                 <Grid Margin="18,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -56,7 +56,7 @@
                         <Border Margin="0,4,0,0"
                                 Padding="8,2"
                                 CornerRadius="4"
-                                Background="{StaticResource InfoBadgeBrush}"
+                                Background="{DynamicResource InfoBadgeBrush}"
                                 HorizontalAlignment="Left"
                                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
                             <TextBlock Text="{x:Static res:ViewerTextResources.Loading}"
@@ -84,7 +84,7 @@
                             Margin="10,0,0,0"
                             VerticalAlignment="Center"
                             CornerRadius="6"
-                            Background="{StaticResource EnvironmentBadgeBrush}"
+                            Background="{DynamicResource EnvironmentBadgeBrush}"
                             Padding="10,5">
                         <TextBlock Text="{Binding EnvironmentLabel}" FontWeight="SemiBold" />
                     </Border>
@@ -102,7 +102,7 @@
                     <Border Grid.Row="0" Style="{StaticResource PanelBorderStyle}" Margin="0,0,0,12">
                         <WrapPanel>
                             <StackPanel Margin="0,0,14,0">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.DeviceStatusFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.DeviceStatusFilterLabel}" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <ComboBox Width="170"
                                           ItemsSource="{Binding DeviceStatusFilters}"
                                           SelectedItem="{Binding SelectedDeviceStatusFilter, Mode=TwoWay}"
@@ -110,7 +110,7 @@
                             </StackPanel>
 
                             <StackPanel Margin="0,0,14,0">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.AlertSeverityFilterLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.AlertSeverityFilterLabel}" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <ComboBox Width="170"
                                           ItemsSource="{Binding AlertSeverityFilters}"
                                           SelectedItem="{Binding SelectedAlertSeverityFilter, Mode=TwoWay}"
@@ -118,7 +118,7 @@
                             </StackPanel>
 
                             <StackPanel Margin="0,0,14,0">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.DeviceSortLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.DeviceSortLabel}" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <ComboBox Width="210"
                                           ItemsSource="{Binding DeviceSortOptions}"
                                           SelectedItem="{Binding SelectedDeviceSortOption, Mode=TwoWay}"
@@ -130,26 +130,26 @@
                     <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,12">
                         <Border Style="{StaticResource PanelBorderStyle}">
                             <StackPanel>
-                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiActiveDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
-                                <TextBlock Text="{Binding ActiveDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OnlineBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiActiveDevices}" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding ActiveDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource OnlineBrush}" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource PanelBorderStyle}">
                             <StackPanel>
-                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiOfflineDevices}" Foreground="{StaticResource TextSecondaryBrush}" />
-                                <TextBlock Text="{Binding OfflineDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OfflineBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiOfflineDevices}" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding OfflineDevicesCount}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource OfflineBrush}" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource PanelBorderStyle}">
                             <StackPanel>
-                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiCriticalAlerts}" Foreground="{StaticResource TextSecondaryBrush}" />
-                                <TextBlock Text="{Binding CriticalAlertsCount}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource OfflineBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiCriticalAlerts}" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding CriticalAlertsCount}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource OfflineBrush}" />
                             </StackPanel>
                         </Border>
                         <Border Style="{StaticResource PanelBorderStyle}">
                             <StackPanel>
-                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiAverageResponse}" Foreground="{StaticResource TextSecondaryBrush}" />
-                                <TextBlock Text="{Binding AverageResponseTimeMs, StringFormat={}{0} ms}" FontSize="30" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.KpiAverageResponse}" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBlock Text="{Binding AverageResponseTimeMs, StringFormat={}{0} ms}" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}" />
                             </StackPanel>
                         </Border>
                     </UniformGrid>
@@ -181,19 +181,19 @@
                                                     <TextBlock Text="{Binding Status}" FontWeight="SemiBold">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Online">
-                                                                        <Setter Property="Foreground" Value="{StaticResource OnlineBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource OnlineBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Warning">
-                                                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Offline">
-                                                                        <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource OfflineBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Status}" Value="Maintenance">
-                                                                        <Setter Property="Foreground" Value="{StaticResource MaintenanceBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource MaintenanceBrush}" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -235,16 +235,16 @@
                                                     <TextBlock Text="{Binding Severity}" FontWeight="SemiBold">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding Severity}" Value="Info">
-                                                                        <Setter Property="Foreground" Value="{StaticResource MaintenanceBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource MaintenanceBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Severity}" Value="Warning">
-                                                                        <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
                                                                     </DataTrigger>
                                                                     <DataTrigger Binding="{Binding Severity}" Value="Critical">
-                                                                        <Setter Property="Foreground" Value="{StaticResource OfflineBrush}" />
+                                                                        <Setter Property="Foreground" Value="{DynamicResource OfflineBrush}" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -269,25 +269,25 @@
                                 <TextBlock Grid.Row="0" Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.DeviceDetailsHeader}" />
 
                                 <StackPanel Grid.Row="1">
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelName}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelName}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDevice.Name, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelType}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelType}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDevice.Type, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelRegion}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelRegion}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDevice.Region, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelStatus}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelStatus}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDeviceStatusText}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelLastUpdate}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelLastUpdate}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDeviceLastUpdateText}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelResponseTime}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelResponseTime}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDeviceResponseTimeText}" Margin="0,0,0,8"/>
 
-                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelDetails}" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{x:Static res:ViewerTextResources.LabelDetails}" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <TextBlock Text="{Binding SelectedDevice.Details, TargetNullValue={x:Static res:ViewerTextResources.NotAvailable}}" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Grid>
@@ -308,7 +308,7 @@
                             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.GeneralSectionHeader}" />
 
                             <StackPanel Margin="0,0,0,10">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.EnvironmentSelectorLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.EnvironmentSelectorLabel}" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <ComboBox Width="180"
                                           ItemsSource="{Binding EnvironmentOptions}"
                                           SelectedItem="{Binding SelectedEnvironmentOption, Mode=TwoWay}"
@@ -316,7 +316,7 @@
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,10">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.AutoRefreshIntervalLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.AutoRefreshIntervalLabel}" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <TextBox Width="180"
                                          Text="{Binding AutoRefreshIntervalSeconds, UpdateSourceTrigger=LostFocus}" />
                             </StackPanel>
@@ -342,7 +342,7 @@
                             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Static res:ViewerTextResources.AppearanceSectionHeader}" />
 
                             <StackPanel Margin="0,0,0,10">
-                                <TextBlock Text="{x:Static res:ViewerTextResources.ThemeLabel}" Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock Text="{x:Static res:ViewerTextResources.ThemeLabel}" Foreground="{DynamicResource TextSecondaryBrush}" />
                                 <ComboBox Width="180"
                                           ItemsSource="{Binding ThemeOptions}"
                                           SelectedItem="{Binding SelectedThemeOption, Mode=TwoWay}"
